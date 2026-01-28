@@ -4,8 +4,10 @@ using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Intrastructure.Identity;
 using BankRUs.Intrastructure.Persistance;
 using BankRUs.Intrastructure.Repositories;
+using BankRUs.Intrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IEmailSender = BankRUs.Application.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<OpenAccountHandler>();
+
+// Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+
+if (builder.Environment.IsDevelopment())
+{
+    // Utveckling
+    builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
+}
+else
+{
+    // Produktion
+    builder.Services.AddScoped<IEmailSender, EmailSender>();
+}
 
 // Repositories
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();

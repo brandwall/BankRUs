@@ -26,7 +26,6 @@ public class IdentityService : IIdentityService
 
         string password = "Secret#1";
 
-        // TODO: Skapa användaren i databasen (ASP.NET Core Identity)
         var result = await _userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)

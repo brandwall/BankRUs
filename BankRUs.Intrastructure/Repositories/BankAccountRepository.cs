@@ -12,11 +12,9 @@ public class BankAccountRepository : IBankAccountRepository
         _db = db;
     }
 
-    public async Task<BankAccount> CreateBankAccount(BankAccount bankAccount)
+    public async Task Add(BankAccount bankAccount)
     {
         _db.BankAccounts.Add(bankAccount);
         await _db.SaveChangesAsync();
-
-        return bankAccount;
     }
 }
