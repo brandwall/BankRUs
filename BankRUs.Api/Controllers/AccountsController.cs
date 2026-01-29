@@ -29,6 +29,8 @@ public class AccountsController : ControllerBase
                 SocialSecurityNumber: request.SocialSecurityNumber,
                 Email: request.Email));
 
+
+
         var response = new CreateAccountResponseDto(openAccountResult.UserId);
 
         // Returnera 201 Created

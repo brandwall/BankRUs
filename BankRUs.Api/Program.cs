@@ -1,13 +1,22 @@
+using BankRUs.Application.Authentication;
+using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Infrastructure.Configuration;
+using BankRUs.Intrastructure.Autentication;
 using BankRUs.Intrastructure.Identity;
 using BankRUs.Intrastructure.Persistance;
 using BankRUs.Intrastructure.Repositories;
 using BankRUs.Intrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using IEmailSender = BankRUs.Application.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,14 +37,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-builder.Services.AddControllers();
+builder.Services
+  .AddIdentity<ApplicationUser, IdentityRole>()
+  .AddEntityFrameworkStores<ApplicationDbContext>()
+  .AddDefaultTokenProviders();
 
 // Command/Query handlers
 builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
+builder.Services.AddScoped<AuthenticateUserHandler>();
 
 // Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -56,10 +71,48 @@ builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 // - scoped = varje HTTP-reqeust får sin egen isntans som sen delas av alla objekt inom denna request
 // - transitent = varje objekt får alltid sin egna instans av typen
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+
 builder.Services
-  .AddIdentity<ApplicationUser, IdentityRole>()
-  .AddEntityFrameworkStores<ApplicationDbContext>()
-  .AddDefaultTokenProviders();
+  .AddAuthentication(options =>
+  {
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  })
+  .AddJwtBearer(options =>
+  {
+      var jwt = builder.Configuration
+        .GetSection(JwtOptions.SectionName)
+        .Get<JwtOptions>()!;
+
+      options.RequireHttpsMetadata = false; // false endast i dev
+      options.SaveToken = true;
+
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer = true,
+          ValidIssuer = jwt.Issuer,
+
+          ValidateAudience = true,
+          ValidAudience = jwt.Audience,
+
+          ValidateIssuerSigningKey = true,
+          IssuerSigningKey = new SymmetricSecurityKey(
+          Encoding.UTF8.GetBytes(jwt.Secret)
+        ),
+
+          ValidateLifetime = true,
+          ClockSkew = TimeSpan.FromSeconds(30),
+
+          NameClaimType = JwtRegisteredClaimNames.Name,
+          RoleClaimType = ClaimTypes.Role
+      };
+  });
+
+builder.Services.AddAuthorization();
+
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -75,6 +128,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

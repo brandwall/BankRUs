@@ -21,4 +21,19 @@ Content-Type: application/json
   "userId": "",
 }
 
+### Logga in / Autentisera
+
+POST https://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "john@doe.com",
+  "password": "Password#1"
+}
+
+### Hämta kontouppgifter
+
+GET https://localhost:8000/api/me
+Content-Type: application/json
+
 
