@@ -25,8 +25,20 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             HasOne<ApplicationUser>().
             WithMany().
             HasForeignKey(b => b.UserId);
+
+        builder.Entity<Deposit>()
+            .OwnsOne(d => d.Currency, currencyBuilder =>
+            {
+                currencyBuilder.Property(c => c.Code)
+                .HasColumnName("Currency")
+                .HasMaxLength(3);
+            })
+            .HasOne<BankAccount>()
+            .WithMany()
+            .HasForeignKey(d => d.BankAccountId);
     }
 
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<Deposit> Deposits => Set<Deposit>();
 }
 

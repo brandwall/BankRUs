@@ -39,4 +39,11 @@ public class BankAccountsController : ControllerBase
 
         return Created(string.Empty, response);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateDeposit(CreateDepositDto request)
+    {
+
+    }
+
 }
