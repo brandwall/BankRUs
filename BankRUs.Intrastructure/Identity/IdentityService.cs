@@ -28,6 +28,7 @@ public class IdentityService : IIdentityService
 
         var result = await _userManager.CreateAsync(user, password);
 
+
         if (!result.Succeeded)
         {
             throw new Exception("Unable to create user");

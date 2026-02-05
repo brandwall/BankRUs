@@ -10,15 +10,18 @@ public class OpenAccountHandler
     private readonly IIdentityService _identityService;
     private readonly IBankAccountRepository _bankAccountRepository;
     private readonly IEmailSender _emailSender;
+    private readonly IUnitOfWork _unitOfWork;
 
     public OpenAccountHandler(
         IIdentityService identityService,
         IBankAccountRepository bankAccountRepository,
-        IEmailSender emailSender)
+        IEmailSender emailSender,
+        IUnitOfWork unitOfWork)
     {
         _identityService = identityService;
         _bankAccountRepository = bankAccountRepository;
         _emailSender = emailSender;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command)
@@ -41,7 +44,8 @@ public class OpenAccountHandler
             name: "Standardkonto",
             userId: createUserResult.UserId.ToString());
 
-        await _bankAccountRepository.Add(bankAccount);
+        await _bankAccountRepository.AddAsync(bankAccount);
+        await _unitOfWork.SaveChangesAsync();
 
         // 4 - Skicka välkomstmail till kund
         await _emailSender.SendEmailAsync(

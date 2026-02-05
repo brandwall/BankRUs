@@ -15,6 +15,11 @@ public class BankAccount
 
     public Guid Id { get; protected set; }
 
+
+    private readonly List<Deposit> _deposits = new();
+    public IReadOnlyCollection<Deposit> Deposits => _deposits.AsReadOnly();
+
+
     [MaxLength(25)]
     public string AccountNumber { get; protected set; }
     
@@ -26,8 +31,12 @@ public class BankAccount
     public decimal Balance { get; protected set; }
     public string UserId { get; protected set; }
 
-    public void Deposit(decimal amount, string reference) { }
-    public void Withdraw(decimal amount, string reference) { }
+    public void AddDeposit(Deposit deposit) 
+    {
+        Balance += deposit.Amount;
+        _deposits.Add(deposit);
+    }
+    //public void Withdraw(decimal amount, string reference) { }
 }
 
 // Konstruktor

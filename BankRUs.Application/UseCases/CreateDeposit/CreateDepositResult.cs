@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BankRUs.Application.UseCases.MakeDeposit;
+namespace BankRUs.Application.UseCases.CreateDeposit;
 
 public record CreateDepositResult(
     Guid TransactionId,

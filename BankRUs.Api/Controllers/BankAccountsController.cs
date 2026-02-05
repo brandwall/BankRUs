@@ -1,7 +1,11 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
+using BankRUs.Application.UseCases.CreateDeposit;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Domain.ValueObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace BankRUs.Api.Controllers;
 
@@ -10,10 +14,14 @@ namespace BankRUs.Api.Controllers;
 public class BankAccountsController : ControllerBase
 {
     private readonly OpenBankAccountHandler _openBankAccountHandler;
+    private readonly CreateDepositHandler _depositHandler;
 
-    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler)
+    public BankAccountsController(
+        OpenBankAccountHandler openBankAccountHandler,
+        CreateDepositHandler depositHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
+        _depositHandler = depositHandler;
     }
 
     // POST /api/bank-accounts
@@ -40,10 +48,20 @@ public class BankAccountsController : ControllerBase
         return Created(string.Empty, response);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateDeposit(CreateDepositDto request)
+    [HttpPost("{id}/deposit")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CreateDeposit(Guid id, CreateDepositDto request)
     {
+        var currency = Currency.FromCode(request.Currency);
 
+        var result = await _depositHandler.HandleAsync(
+            new CreateDepositCommand(
+                id,
+                request.Amount,
+                request.Reference,
+                request.Currency));
+
+        return Created(string.Empty, result);
     }
 
 }

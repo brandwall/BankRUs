@@ -2,7 +2,9 @@
 
 public class Currency
 {
-    public string Code { get; set; }
+    public string Code { get; private set; }
+    // tydligen behöver en private constructor för att EF ska fungera
+    private Currency() { }
     private Currency(string code)
     {
         Code = code;
