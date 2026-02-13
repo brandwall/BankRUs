@@ -1,13 +1,12 @@
 ﻿using BankRUs.Domain.Entities;
-using BankRUs.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace BankRUs.Application.UseCases.CreateDeposit;
+namespace BankRUs.Application.UseCases.CreateWithdrawal;
 
-public record CreateDepositResult(
+public record CreateWithdrawalResult(
     Guid TransactionId,
     DateTime TransactionDate,
     string AccountNumber,

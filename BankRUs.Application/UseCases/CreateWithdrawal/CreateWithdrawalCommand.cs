@@ -4,21 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BankRUs.Application.UseCases.CreateDeposit;
+namespace BankRUs.Application.UseCases.CreateWithdrawal;
 
-public record CreateDepositCommand
+public class CreateWithdrawalCommand
 {
     public Guid BankAccountId { get; }
     public decimal Amount { get; }
     public string? Reference { get; }
     public string CurrencyCode { get; }
-    public TransactionType TransactionType => TransactionType.Deposit;
+    public TransactionType TransactionType => TransactionType.Withdrawal;
+    public string? UserId { get; }
 
-    public CreateDepositCommand(Guid bankAccountId, decimal amount, string reference, string currency)
+    public CreateWithdrawalCommand(Guid bankAccountId, decimal amount, string reference, string currency, string userId)
     {
         BankAccountId = bankAccountId;
         Amount = amount;
         Reference = reference;
         CurrencyCode = currency;
+        UserId = userId;
     }
 }

@@ -1,10 +1,9 @@
 ﻿using BankRUs.Api.Attributes;
-using BankRUs.Domain.ValueObjects;
 using System.ComponentModel.DataAnnotations;
 
 namespace BankRUs.Api.Dtos.BankAccounts;
 
-public record CreateDepositDto(
+public record CreateWithdrawalDto(
         [Required]
         [IsPositiveDecimal]
         decimal Amount,

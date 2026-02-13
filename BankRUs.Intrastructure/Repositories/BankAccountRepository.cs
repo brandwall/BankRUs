@@ -1,6 +1,6 @@
 ﻿using BankRUs.Application.Repositories;
 using BankRUs.Domain.Entities;
-using BankRUs.Intrastructure.Persistance.Application;
+using BankRUs.Intrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 
 namespace BankRUs.Intrastructure.Repositories;
@@ -16,6 +16,10 @@ public class BankAccountRepository : IBankAccountRepository
     public async Task AddAsync(BankAccount bankAccount)
     {
         await _db.BankAccounts.AddAsync(bankAccount);
+    }
+    public async Task AddAsync(Transaction transaction)
+    {
+        await _db.Transactions.AddAsync(transaction);
     }
 
     public async Task<BankAccount?> GetByIdAsync(Guid bankAccountId)

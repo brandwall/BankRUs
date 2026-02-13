@@ -1,11 +1,13 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
 using BankRUs.Application.UseCases.CreateDeposit;
+using BankRUs.Application.UseCases.CreateWithdrawal;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using System.Security.Claims;
 
 namespace BankRUs.Api.Controllers;
 
@@ -15,13 +17,16 @@ public class BankAccountsController : ControllerBase
 {
     private readonly OpenBankAccountHandler _openBankAccountHandler;
     private readonly CreateDepositHandler _depositHandler;
+    private readonly CreateWithdrawalHandler _withdrawalHandler;
 
     public BankAccountsController(
         OpenBankAccountHandler openBankAccountHandler,
-        CreateDepositHandler depositHandler)
+        CreateDepositHandler depositHandler,
+        CreateWithdrawalHandler withdrawalHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
         _depositHandler = depositHandler;
+        _withdrawalHandler = withdrawalHandler;
     }
 
     // POST /api/bank-accounts
@@ -52,14 +57,31 @@ public class BankAccountsController : ControllerBase
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> CreateDeposit(Guid id, CreateDepositDto request)
     {
-        var currency = Currency.FromCode(request.Currency);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var result = await _depositHandler.HandleAsync(
             new CreateDepositCommand(
                 id,
                 request.Amount,
                 request.Reference,
-                request.Currency));
+                request.CurrencyCode));
+
+        return Created(string.Empty, result);
+    }
+
+    [HttpPost("{id}/withdraw")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CreateWithdrawal(Guid id, CreateWithdrawalDto request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var result = await _withdrawalHandler.HandleAsync(
+            new CreateWithdrawalCommand(
+                id,
+                request.Amount,
+                request.Reference,
+                request.CurrencyCode,
+                userId));
 
         return Created(string.Empty, result);
     }

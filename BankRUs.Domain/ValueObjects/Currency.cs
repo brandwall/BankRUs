@@ -18,7 +18,7 @@ public class Currency
         code = code.ToUpperInvariant();
 
         if (!ValidCurrencies.Contains(code))
-            throw new ArgumentException($"Invalid currencty code: {code}");
+            throw new ArgumentException($"Invalid currency code: {code}");
 
         return new Currency(code);
     }
