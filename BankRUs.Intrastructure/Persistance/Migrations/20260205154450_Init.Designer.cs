@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BankRUs.Intrastructure.Migrations
+namespace BankRUs.Intrastructure.Persistance.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260128124056_Add_BankAccount")]
-    partial class Add_BankAccount
+    [Migration("20260205154450_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,32 @@ namespace BankRUs.Intrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("BankAccounts");
+                });
+
+            modelBuilder.Entity("BankRUs.Domain.Entities.Deposit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BankAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(140)
+                        .HasColumnType("nvarchar(140)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BankAccountId");
+
+                    b.ToTable("Deposits");
                 });
 
             modelBuilder.Entity("BankRUs.Intrastructure.Identity.ApplicationUser", b =>
@@ -278,6 +304,37 @@ namespace BankRUs.Intrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BankRUs.Domain.Entities.Deposit", b =>
+                {
+                    b.HasOne("BankRUs.Domain.Entities.BankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("BankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("BankRUs.Domain.ValueObjects.Currency", "Currency", b1 =>
+                        {
+                            b1.Property<Guid>("DepositId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Code")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("nvarchar(3)")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("DepositId");
+
+                            b1.ToTable("Deposits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DepositId");
+                        });
+
+                    b.Navigation("Currency")
                         .IsRequired();
                 });
 

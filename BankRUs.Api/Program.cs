@@ -1,7 +1,10 @@
+using BankRUs.Api;
 using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
+using BankRUs.Application.UseCases.CreateDeposit;
+using BankRUs.Application.UseCases.CreateWithdrawal;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Infrastructure.Configuration;
@@ -46,6 +49,8 @@ builder.Services
 builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
+builder.Services.AddScoped<CreateDepositHandler>();
+builder.Services.AddScoped<CreateWithdrawalHandler>();
 
 // Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
@@ -65,6 +70,7 @@ else
 
 // Repositories
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // 3 typer av livslängder på objekt
 // - singleton = ett och samma objekt delas mellan alla andra under hela applikations livslängd
@@ -128,6 +134,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionMiddleware>();
 
 // GET /api/me
 // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30

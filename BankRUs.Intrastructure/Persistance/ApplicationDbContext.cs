@@ -21,12 +21,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .IsUnique();
         });
 
+        // Skapar koppling så att ett BankAccount har en ApplicationUser (one to many - en User kan ha flera Konton)
         builder.Entity<BankAccount>().
             HasOne<ApplicationUser>().
             WithMany().
             HasForeignKey(b => b.UserId);
 
-        builder.Entity<Deposit>()
+        builder.Entity<Transaction>()
             .OwnsOne(d => d.Currency, currencyBuilder =>
             {
                 currencyBuilder.Property(c => c.Code)
@@ -35,10 +36,17 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             })
             .HasOne<BankAccount>()
             .WithMany()
-            .HasForeignKey(d => d.BankAccountId);
+            .HasForeignKey(d => d.BankAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Istället för att omvandla enum TransactionType till int så sparar den värdena som strängar
+        builder.Entity<Transaction>()
+            .Property(t => t.TransactionType)
+            .HasConversion<string>()
+            .HasMaxLength(20);
     }
 
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
-    public DbSet<Deposit> Deposits => Set<Deposit>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
 }
 

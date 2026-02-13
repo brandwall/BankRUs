@@ -1,5 +1,5 @@
 ﻿using BankRUs.Application.Repositories;
-using BankRUs.Intrastructure.Persistance.Application;
+using BankRUs.Intrastructure.Persistance;
 using System;
 using System.Collections.Generic;
 using System.Text;
